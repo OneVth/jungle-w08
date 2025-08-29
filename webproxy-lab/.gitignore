@@ -61,3 +61,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# 실행 파일 제외
+*.exe
+*.out
+*.app
+client
+server
