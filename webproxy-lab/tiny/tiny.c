@@ -59,7 +59,6 @@ void doit(int fd)
 
   /* Read request line and headers */
   Rio_readinitb(&rio, fd);
-  printf("before read\n");
   Rio_readlineb(&rio, buf, MAXLINE);
   printf("Request headers:\n");
   printf("%s", buf);
@@ -218,7 +217,11 @@ void get_filetype(char *filename, char *filetype)
   }
   else if (strstr(filename, ".mpg"))
   {
-    strcpy(filetype, "video/mpg");
+    strcpy(filetype, "video/mpeg");
+  }
+  else if (strstr(filename, ".mp4"))
+  {
+    strcpy(filetype, "video/mp4");
   }
   else
   {
