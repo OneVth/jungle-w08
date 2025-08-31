@@ -187,11 +187,21 @@ void serve_static(int fd, char *filename, int filesize)
   printf("%s", buf);
 
   /* Send response body to client */
+  rio_t rio;
+  char *src = (char *)malloc(filesize);
+  char *ptr = src;
   srcfd = Open(filename, O_RDONLY, 0);
-  srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
+  Rio_readinitb(&rio, srcfd);
+  ssize_t rc = Rio_readlineb(&rio, src, MAXBUF);
+  while (rc > 0)
+  {
+    ptr = ptr + rc;
+    rc = Rio_readlineb(&rio, ptr, MAXBUF);
+  }
+
+  Rio_writen(fd, src, filesize);
   Close(srcfd);
-  Rio_writen(fd, srcp, filesize);
-  Munmap(srcp, filesize);
+  free(src);
 }
 
 /*
@@ -244,7 +254,7 @@ void serve_dynamic(int fd, char *filename, char *cgiargs)
     /* Child */
     /* Real server would set all CGI vars here */
     setenv("QUERY_STRING", cgiargs, 1);
-    Dup2(fd, STDOUT_FILENO); /* Redirect stdout to client */
+    Dup2(fd, STDOUT_FILENO);              /* Redirect stdout to client */
     Execve(filename, emptylist, environ); /* Run CGI program*/
   }
   Wait(NULL); /* Parent waits for and reaps child */
